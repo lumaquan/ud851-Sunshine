@@ -1,18 +1,3 @@
-/*
- * Copyright (C) 2016 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.example.android.sunshine;
 
 import android.annotation.SuppressLint;
@@ -22,32 +7,49 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.utilities.NetworkUtils;
+import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
+
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity {
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-    private TextView mWeatherTextView;
-    private ScrollView mWeatherContainerScrollview;
-    private TextView mErrorTextView;
-    private ProgressBar mLoadingProgressBar;
+public class MainActivity extends AppCompatActivity implements ForecastAdapter.OnItemClickListener {
+
+    @BindView(R.id.rv_forecast)
+    RecyclerView mForecastRecyclerView;
+    @BindView(R.id.tv_error_loading)
+    TextView mErrorTextView;
+    @BindView(R.id.pb_weather_loading)
+    ProgressBar mLoadingProgressBar;
+
+    private ForecastAdapter mForecastAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast);
-        mWeatherTextView = findViewById(R.id.tv_weather_data);
-        mWeatherContainerScrollview = findViewById(R.id.sv_weather_container);
-        mErrorTextView = findViewById(R.id.tv_error_loading);
-        mLoadingProgressBar = findViewById(R.id.pb_weather_loading);
+        ButterKnife.bind(this);
+        initialSetup();
+    }
+
+    private void initialSetup() {
+        mForecastRecyclerView.setHasFixedSize(true);
+        mForecastRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mForecastAdapter = new ForecastAdapter(null, this);
+        mForecastRecyclerView.setAdapter(mForecastAdapter);
     }
 
     private void loadWeatherData() {
@@ -57,8 +59,13 @@ public class MainActivity extends AppCompatActivity {
             new FetchWeatherDataTask().execute(urlPreferredLocation);
     }
 
+    @Override
+    public void onItemClicked(String weather) {
+        Toast.makeText(this, weather, Toast.LENGTH_SHORT).show();
+    }
+
     @SuppressLint("StaticFieldLeak")
-    private class FetchWeatherDataTask extends AsyncTask<URL, Void, String> {
+    private class FetchWeatherDataTask extends AsyncTask<URL, Void, String[]> {
 
         @Override
         protected void onPreExecute() {
@@ -66,30 +73,34 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected String doInBackground(URL... urls) {
+        protected String[] doInBackground(URL... urls) {
             URL url = urls[0];
             try {
-                return NetworkUtils.getResponseFromHttpUrl(url);
+                String weatherJsonResponse = NetworkUtils.getResponseFromHttpUrl(url);
+                return OpenWeatherJsonUtils.getSimpleWeatherStringsFromJson(getBaseContext(), weatherJsonResponse);
+            } catch (JSONException e) {
+                return null;
             } catch (IOException e) {
                 return null;
             }
         }
 
         @Override
-        protected void onPostExecute(String s) {
+        protected void onPostExecute(String[] forecast) {
             mLoadingProgressBar.setVisibility(View.INVISIBLE);
-            if (s != null) {
+            if (forecast != null) {
                 showWeatherDataView(true);
-                mWeatherTextView.setText(s);
+                mForecastAdapter.setForecast(forecast);
             } else {
                 showWeatherDataView(false);
             }
         }
+
     }
 
     private void showWeatherDataView(boolean showWeatherData) {
         mErrorTextView.setVisibility(showWeatherData ? View.INVISIBLE : View.VISIBLE);
-        mWeatherContainerScrollview.setVisibility(showWeatherData ? View.VISIBLE : View.INVISIBLE);
+        mForecastRecyclerView.setVisibility(showWeatherData ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
