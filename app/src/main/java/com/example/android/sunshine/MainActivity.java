@@ -21,25 +21,32 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.utilities.NetworkUtils;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
     private TextView mWeatherTextView;
+    private ScrollView mWeatherContainerScrollview;
+    private TextView mErrorTextView;
+    private ProgressBar mLoadingProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast);
         mWeatherTextView = findViewById(R.id.tv_weather_data);
+        mWeatherContainerScrollview = findViewById(R.id.sv_weather_container);
+        mErrorTextView = findViewById(R.id.tv_error_loading);
+        mLoadingProgressBar = findViewById(R.id.pb_weather_loading);
     }
 
     private void loadWeatherData() {
@@ -53,6 +60,11 @@ public class MainActivity extends AppCompatActivity {
     private class FetchWeatherDataTask extends AsyncTask<URL, Void, String> {
 
         @Override
+        protected void onPreExecute() {
+            mLoadingProgressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
         protected String doInBackground(URL... urls) {
             URL url = urls[0];
             try {
@@ -64,12 +76,19 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String s) {
+            mLoadingProgressBar.setVisibility(View.INVISIBLE);
             if (s != null) {
+                showWeatherDataView(true);
                 mWeatherTextView.setText(s);
             } else {
-                mWeatherTextView.setText(getString(R.string.error_loading_weather));
+                showWeatherDataView(false);
             }
         }
+    }
+
+    private void showWeatherDataView(boolean showWeatherData) {
+        mErrorTextView.setVisibility(showWeatherData ? View.INVISIBLE : View.VISIBLE);
+        mWeatherContainerScrollview.setVisibility(showWeatherData ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
