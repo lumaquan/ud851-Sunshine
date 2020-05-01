@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,6 +52,9 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
         mForecastRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mForecastAdapter = new ForecastAdapter(null, this);
         mForecastRecyclerView.setAdapter(mForecastAdapter);
+        LayoutAnimationController controller = AnimationUtils.loadLayoutAnimation(this, R.anim.layout_animation_falldown);
+        mForecastRecyclerView.setLayoutAnimation(controller);
+        ;
     }
 
     private void loadWeatherData() {
@@ -91,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
             if (forecast != null) {
                 showWeatherDataView(true);
                 mForecastAdapter.setForecast(forecast);
+                mForecastRecyclerView.scheduleLayoutAnimation();
             } else {
                 showWeatherDataView(false);
             }
@@ -111,13 +117,11 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case R.id.refresh_action:
-                loadWeatherData();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.refresh_action) {
+            mForecastAdapter.setForecast(null);
+            loadWeatherData();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 }

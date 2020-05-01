@@ -44,7 +44,11 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHo
     }
 
     public void setForecast(String[] forecast) {
-        mForecast = Arrays.asList(forecast);
+        if (forecast == null) {
+            mForecast = null;
+        } else {
+            mForecast = Arrays.asList(forecast);
+        }
         notifyDataSetChanged();
     }
 
