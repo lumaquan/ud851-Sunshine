@@ -21,61 +21,24 @@ import android.util.Log;
 import com.example.android.sunshine.R;
 import com.example.android.sunshine.data.SunshinePreferences;
 
-/**
- * Contains useful utilities for a weather app, such as conversion between Celsius and Fahrenheit,
- * from kph to mph, and from degrees to NSEW.  It also contains the mapping of weather condition
- * codes in OpenWeatherMap to strings.  These strings are contained
- */
 public final class SunshineWeatherUtils {
 
     private static final String LOG_TAG = SunshineWeatherUtils.class.getSimpleName();
 
-    /**
-     * This method will convert a temperature from Celsius to Fahrenheit.
-     *
-     * @param temperatureInCelsius Temperature in degrees Celsius(°C)
-     *
-     * @return Temperature in degrees Fahrenheit (°F)
-     */
     private static double celsiusToFahrenheit(double temperatureInCelsius) {
         double temperatureInFahrenheit = (temperatureInCelsius * 1.8) + 32;
         return temperatureInFahrenheit;
     }
 
-    /**
-     * Temperature data is stored in Celsius by our app. Depending on the user's preference,
-     * the app may need to display the temperature in Fahrenheit. This method will perform that
-     * temperature conversion if necessary. It will also format the temperature so that no
-     * decimal points show. Temperatures will be formatted to the following form: "21°C"
-     *
-     * @param context     Android Context to access preferences and resources
-     * @param temperature Temperature in degrees Celsius (°C)
-     *
-     * @return Formatted temperature String in the following form:
-     * "21°C"
-     */
     public static String formatTemperature(Context context, double temperature) {
         int temperatureFormatResourceId = R.string.format_temperature_celsius;
-
         if (!SunshinePreferences.isMetric(context)) {
             temperature = celsiusToFahrenheit(temperature);
             temperatureFormatResourceId = R.string.format_temperature_fahrenheit;
         }
-
-        /* For presentation, assume the user doesn't care about tenths of a degree. */
         return String.format(context.getString(temperatureFormatResourceId), temperature);
     }
 
-    /**
-     * This method will format the temperatures to be displayed in the
-     * following form: "HIGH°C / LOW°C"
-     *
-     * @param context Android Context to access preferences and resources
-     * @param high    High temperature for a day in user's preferred units
-     * @param low     Low temperature for a day in user's preferred units
-     *
-     * @return String in the form: "HIGH°C / LOW°C"
-     */
     public static String formatHighLows(Context context, double high, double low) {
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
@@ -87,17 +50,6 @@ public final class SunshineWeatherUtils {
         return highLowStr;
     }
 
-    /**
-     * This method uses the wind direction in degrees to determine compass direction as a
-     * String. (eg NW) The method will return the wind String in the following form: "2 km/h SW"
-     *
-     * @param context   Android Context to access preferences and resources
-     * @param windSpeed Wind speed in kilometers / hour
-     * @param degrees   Degrees as measured on a compass, NOT temperature degrees!
-     *                  See https://www.mathsisfun.com/geometry/degrees.html
-     *
-     * @return Wind String in the following form: "2 km/h SW"
-     */
     public static String getFormattedWind(Context context, float windSpeed, float degrees) {
 
         int windFormat = R.string.format_wind_kmh;
@@ -107,10 +59,6 @@ public final class SunshineWeatherUtils {
             windSpeed = .621371192237334f * windSpeed;
         }
 
-        /*
-         * You know what's fun, writing really long if/else statements with tons of possible
-         * conditions. Seriously, try it!
-         */
         String direction = "Unknown";
         if (degrees >= 337.5 || degrees < 22.5) {
             direction = "N";
@@ -132,16 +80,6 @@ public final class SunshineWeatherUtils {
         return String.format(context.getString(windFormat), windSpeed, direction);
     }
 
-    /**
-     * Helper method to provide the string according to the weather
-     * condition id returned by the OpenWeatherMap call.
-     *
-     * @param context   Android context
-     * @param weatherId from OpenWeatherMap API response
-     *                  http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
-     *
-     * @return String for the weather condition, null if no relation is found.
-     */
     public static String getStringForWeatherCondition(Context context, int weatherId) {
         int stringId;
         if (weatherId >= 200 && weatherId <= 232) {
@@ -311,19 +249,7 @@ public final class SunshineWeatherUtils {
         return context.getString(stringId);
     }
 
-    /**
-     * Helper method to provide the icon resource id according to the weather condition id returned
-     * by the OpenWeatherMap call.
-     *
-     * @param weatherId from OpenWeatherMap API response
-     *
-     * @return resource id for the corresponding icon. -1 if no relation is found.
-     */
     public static int getIconResourceForWeatherCondition(int weatherId) {
-        /*
-         * Based on weather code data found at:
-         * See http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
-         */
         if (weatherId >= 200 && weatherId <= 232) {
             return R.drawable.ic_storm;
         } else if (weatherId >= 300 && weatherId <= 321) {
@@ -350,19 +276,7 @@ public final class SunshineWeatherUtils {
         return -1;
     }
 
-    /**
-     * Helper method to provide the art resource id according to the weather condition id returned
-     * by the OpenWeatherMap call.
-     *
-     * @param weatherId from OpenWeatherMap API response
-     *
-     * @return resource id for the corresponding icon. -1 if no relation is found.
-     */
     public static int getArtResourceForWeatherCondition(int weatherId) {
-        /*
-         * Based on weather code data found at:
-         * http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
-         */
         if (weatherId >= 200 && weatherId <= 232) {
             return R.drawable.art_storm;
         } else if (weatherId >= 300 && weatherId <= 321) {

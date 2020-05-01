@@ -15,34 +15,59 @@
  */
 package com.example.android.sunshine;
 
+import android.annotation.SuppressLint;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.android.sunshine.data.SunshinePreferences;
+import com.example.android.sunshine.utilities.NetworkUtils;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView mWeather;
+    private TextView mWeatherTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast);
-
-        mWeather = findViewById(R.id.tv_weather_data);
-
-        String[] fakeWeatherData = new String[]{
-                "Weather 1",
-                "Weather 2",
-                "Weather 3",
-                "Weather 4",
-                "Weather 5",
-                "Weather 6",
-        };
-
-
-        for (String s : fakeWeatherData) {
-            mWeather.append(s + "\n\n");
-        }
+        mWeatherTextView = findViewById(R.id.tv_weather_data);
+        loadWeatherData();
     }
 
+    private void loadWeatherData() {
+        String preferredLocation = SunshinePreferences.getPreferredWeatherLocation(this);
+        URL urlPreferredLocation = NetworkUtils.buildUrlForZipCodeCodeCountry(preferredLocation);
+        if (urlPreferredLocation != null)
+            new FetchWeatherDataTask().execute(urlPreferredLocation);
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private class FetchWeatherDataTask extends AsyncTask<URL, Void, String> {
+
+        @Override
+        protected String doInBackground(URL... urls) {
+            URL url = urls[0];
+            try {
+                return NetworkUtils.getResponseFromHttpUrl(url);
+            } catch (IOException e) {
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if (s != null) {
+                mWeatherTextView.setText(s);
+            } else {
+                mWeatherTextView.setText(getString(R.string.error_loading_weather));
+            }
+        }
+    }
 }
