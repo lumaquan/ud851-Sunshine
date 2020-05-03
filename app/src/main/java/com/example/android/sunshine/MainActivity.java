@@ -1,6 +1,7 @@
 package com.example.android.sunshine;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -66,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
 
     @Override
     public void onItemClicked(String weather) {
-        Toast.makeText(this, weather, Toast.LENGTH_SHORT).show();
+     DetailActivity.launch(this, weather);
     }
 
     @SuppressLint("StaticFieldLeak")
