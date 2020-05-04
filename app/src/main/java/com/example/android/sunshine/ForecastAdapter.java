@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
+
     interface OnItemClickListener {
         void onItemClicked(String weather);
     }
@@ -19,7 +20,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHo
     private List<String> mForecast;
     private final OnItemClickListener mOnItemClicklistener;
 
-    public ForecastAdapter(List<String> forecast, OnItemClickListener listener) {
+    ForecastAdapter(List<String> forecast, OnItemClickListener listener) {
         this.mForecast = forecast;
         this.mOnItemClicklistener = listener;
     }
@@ -43,7 +44,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHo
         return 0;
     }
 
-    public void setForecast(String[] forecast) {
+    void setForecast(String[] forecast) {
         if (forecast == null) {
             mForecast = null;
         } else {

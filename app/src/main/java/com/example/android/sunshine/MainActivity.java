@@ -1,7 +1,6 @@
 package com.example.android.sunshine;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -11,11 +10,11 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.utilities.NetworkUtils;
@@ -29,7 +28,7 @@ import java.net.URL;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements ForecastAdapter.OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements ForecastAdapter.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener {
 
     @BindView(R.id.rv_forecast)
     RecyclerView mForecastRecyclerView;
@@ -37,6 +36,9 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
     TextView mErrorTextView;
     @BindView(R.id.pb_weather_loading)
     ProgressBar mLoadingProgressBar;
+    @BindView(R.id.srl_forecast)
+    SwipeRefreshLayout swipeRefreshLayout;
+
 
     private ForecastAdapter mForecastAdapter;
 
@@ -55,7 +57,11 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
         mForecastRecyclerView.setAdapter(mForecastAdapter);
         LayoutAnimationController controller = AnimationUtils.loadLayoutAnimation(this, R.anim.layout_animation_falldown);
         mForecastRecyclerView.setLayoutAnimation(controller);
-        ;
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
     }
 
     private void loadWeatherData() {
@@ -67,7 +73,13 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
 
     @Override
     public void onItemClicked(String weather) {
-     DetailActivity.launch(this, weather);
+        DetailActivity.launch(this, weather);
+    }
+
+    @Override
+    public void onRefresh() {
+        swipeRefreshLayout.setRefreshing(true);
+        loadWeatherData();
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -75,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
 
         @Override
         protected void onPreExecute() {
-            mLoadingProgressBar.setVisibility(View.VISIBLE);
+            // mLoadingProgressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -93,7 +105,8 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
 
         @Override
         protected void onPostExecute(String[] forecast) {
-            mLoadingProgressBar.setVisibility(View.INVISIBLE);
+            //mLoadingProgressBar.setVisibility(View.INVISIBLE);
+            swipeRefreshLayout.setRefreshing(false);
             if (forecast != null) {
                 showWeatherDataView(true);
                 mForecastAdapter.setForecast(forecast);
@@ -116,11 +129,13 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
         return true;
     }
 
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.refresh_action) {
             mForecastAdapter.setForecast(null);
-            loadWeatherData();
+            onRefresh();
             return true;
         }
         return super.onOptionsItemSelected(item);
