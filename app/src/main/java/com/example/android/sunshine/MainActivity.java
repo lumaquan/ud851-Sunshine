@@ -1,7 +1,5 @@
 package com.example.android.sunshine;
 
-import android.annotation.SuppressLint;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,7 +9,12 @@ import android.view.animation.LayoutAnimationController;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.AsyncTaskLoader;
+import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -28,7 +31,10 @@ import java.net.URL;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements ForecastAdapter.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener {
+public class MainActivity extends AppCompatActivity implements ForecastAdapter.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener, LoaderManager.LoaderCallbacks<String[]> {
+
+    private static final int WEATHER_FORECAST_LOADER_ID = 783;
+    private static final String WEATHER_FORECAST_EXTRA = "forecast_extra";
 
     @BindView(R.id.rv_forecast)
     RecyclerView mForecastRecyclerView;
@@ -38,7 +44,6 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
     ProgressBar mLoadingProgressBar;
     @BindView(R.id.srl_forecast)
     SwipeRefreshLayout swipeRefreshLayout;
-
 
     private ForecastAdapter mForecastAdapter;
 
@@ -67,8 +72,17 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
     private void loadWeatherData() {
         String preferredLocation = SunshinePreferences.getPreferredWeatherLocation(this);
         URL urlPreferredLocation = NetworkUtils.buildUrlForZipCodeCodeCountry(preferredLocation);
-        if (urlPreferredLocation != null)
-            new FetchWeatherDataTask().execute(urlPreferredLocation);
+        if (urlPreferredLocation != null) {
+            Bundle forecastURL = new Bundle();
+            forecastURL.putSerializable(WEATHER_FORECAST_EXTRA, urlPreferredLocation);
+            LoaderManager loaderManager = getSupportLoaderManager();
+            Loader loader = loaderManager.getLoader(WEATHER_FORECAST_LOADER_ID);
+            if (loader == null) {
+                loaderManager.initLoader(WEATHER_FORECAST_LOADER_ID, forecastURL, this);
+            } else {
+                loaderManager.restartLoader(WEATHER_FORECAST_LOADER_ID, forecastURL, this);
+            }
+        }
     }
 
     @Override
@@ -82,40 +96,50 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
         loadWeatherData();
     }
 
-    @SuppressLint("StaticFieldLeak")
-    private class FetchWeatherDataTask extends AsyncTask<URL, Void, String[]> {
+    @NonNull
+    @Override
+    public Loader<String[]> onCreateLoader(int id, @Nullable final Bundle args) {
 
-        @Override
-        protected void onPreExecute() {
-            // mLoadingProgressBar.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected String[] doInBackground(URL... urls) {
-            URL url = urls[0];
-            try {
-                String weatherJsonResponse = NetworkUtils.getResponseFromHttpUrl(url);
-                return OpenWeatherJsonUtils.getSimpleWeatherStringsFromJson(getBaseContext(), weatherJsonResponse);
-            } catch (JSONException e) {
-                return null;
-            } catch (IOException e) {
-                return null;
+        return new AsyncTaskLoader<String[]>(this) {
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+                if (args == null) return;
+                swipeRefreshLayout.setRefreshing(true);
+                forceLoad();
             }
-        }
 
-        @Override
-        protected void onPostExecute(String[] forecast) {
-            //mLoadingProgressBar.setVisibility(View.INVISIBLE);
-            swipeRefreshLayout.setRefreshing(false);
-            if (forecast != null) {
-                showWeatherDataView(true);
-                mForecastAdapter.setForecast(forecast);
-                mForecastRecyclerView.scheduleLayoutAnimation();
-            } else {
-                showWeatherDataView(false);
+            @Nullable
+            @Override
+            public String[] loadInBackground() {
+                try {
+                    assert args != null;
+                    URL url = (URL) args.getSerializable(WEATHER_FORECAST_EXTRA);
+                    Thread.sleep(2000);
+                    String weatherJsonResponse = NetworkUtils.getResponseFromHttpUrl(url);
+                    return OpenWeatherJsonUtils.getSimpleWeatherStringsFromJson(getBaseContext(), weatherJsonResponse);
+                } catch (JSONException | IOException | InterruptedException e) {
+                    return null;
+                }
             }
-        }
+        };
+    }
 
+    @Override
+    public void onLoadFinished(@NonNull Loader<String[]> loader, String[] forecast) {
+        swipeRefreshLayout.setRefreshing(false);
+        if (forecast != null) {
+            showWeatherDataView(true);
+            mForecastAdapter.setForecast(forecast);
+            mForecastRecyclerView.scheduleLayoutAnimation();
+        } else {
+            showWeatherDataView(false);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<String[]> loader) {
+        loader.reset();
     }
 
     private void showWeatherDataView(boolean showWeatherData) {
@@ -130,7 +154,6 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
     }
 
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.refresh_action) {
@@ -140,4 +163,5 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
         }
         return super.onOptionsItemSelected(item);
     }
+
 }

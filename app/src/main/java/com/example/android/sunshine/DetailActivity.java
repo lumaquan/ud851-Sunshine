@@ -8,7 +8,6 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ShareCompat;
 
@@ -21,8 +20,6 @@ public class DetailActivity extends AppCompatActivity {
 
     @BindView(R.id.tv_weather)
     TextView mWeatherTextView;
-
-    private String mutableState;
 
     public static void launch(Context context, String weather) {
         Intent intent = new Intent(context, DetailActivity.class);
@@ -39,26 +36,7 @@ public class DetailActivity extends AppCompatActivity {
         if (intent.hasExtra(WEATHER_EXTRA)) {
             mWeatherTextView.setText(intent.getStringExtra(WEATHER_EXTRA));
         }
-    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
     }
 
     @Override
