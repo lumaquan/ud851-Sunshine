@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        android:defaultValue="@string/pref_unit_celsius_value"
+        android:entryValues="@array/pref_units_values"
+        android:key="@string/pref_units_key"
+        android:title="Select Temperature Units"
+        app:entries="@array/pref_units_labels" />
+
+</PreferenceScreen>

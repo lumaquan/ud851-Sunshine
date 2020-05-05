@@ -11,17 +11,27 @@
     <!--or something similar.-->
     <string name="app_name">Sunshine</string>
     <string name="error_loading_weather">An error has ocurred, please try later.</string>
-    <string name="refresh">Refresh</string>
+    <string name="settings_menu_item">Settings</string>
+    <string name="share_menu_item">Share</string>
+
+
+    <string name="pref_units_key">units</string>
+
+    <string name="pref_unit_celsius_label">Celsius</string>
+    <string name="pref_unit_fahrenheit_label">Fahrenheit</string>
+
+    <string name="pref_unit_celsius_value">metric</string>
+    <string name="pref_unit_fahrenheit_value">imperial</string>
 
 
     <!-- - - - - - - - - - - - - -->
     <!--Used by SunshineDateUtils-->
     <!-- - - - - - - - - - - - - -->
 
-    <!-- For labelling today's forecast [CHAR LIMIT=15] -->
+    <!-- For labelling today's forecast_menu [CHAR LIMIT=15] -->
     <string name="today">Today</string>
 
-    <!-- For labelling tomorrow's forecast [CHAR LIMIT=15] -->
+    <!-- For labelling tomorrow's forecast_menu [CHAR LIMIT=15] -->
     <string name="tomorrow">Tomorrow</string>
 
     <!-- Date format [CHAR LIMIT=NONE] -->
@@ -113,7 +123,6 @@
     <string name="condition_962">Hurricane</string>
 
     <string name="condition_unknown">Unknown (<xliff:g id="conditionId">%1$d</xliff:g>)</string>
-    <string name="share_weather">Share</string>
 
 
     <!-- - - - - - - - - - - -->

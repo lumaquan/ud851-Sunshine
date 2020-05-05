@@ -47,17 +47,48 @@ public class DetailActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.share_action) {
-            Intent intent = ShareCompat.IntentBuilder.from(this)
-                    .setChooserTitle("Please select how to share...")
-                    .setSubject("My chosen weather")
-                    .setText(mWeatherTextView.getText())
-                    .setType("text/plain")
-                    .createChooserIntent();
-            startActivity(intent);
-            return true;
-        } else {
-            return super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case R.id.share_action:
+                Intent shareIntent = ShareCompat.IntentBuilder.from(this)
+                        .setChooserTitle("Please select how to share...")
+                        .setSubject("My chosen weather")
+                        .setText(mWeatherTextView.getText())
+                        .setType("text/plain")
+                        .createChooserIntent();
+                startActivity(shareIntent);
+                return true;
+            case R.id.settings_action:
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }

@@ -1,5 +1,6 @@
 package com.example.android.sunshine;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -101,10 +102,18 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
     public Loader<String[]> onCreateLoader(int id, @Nullable final Bundle args) {
 
         return new AsyncTaskLoader<String[]>(this) {
+
+            private String[] resultsCached;
+
             @Override
             protected void onStartLoading() {
                 super.onStartLoading();
                 if (args == null) return;
+
+                if (resultsCached != null) {
+                    deliverResult(resultsCached);
+                    return;
+                }
                 swipeRefreshLayout.setRefreshing(true);
                 forceLoad();
             }
@@ -121,6 +130,12 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
                 } catch (JSONException | IOException | InterruptedException e) {
                     return null;
                 }
+            }
+
+            @Override
+            public void deliverResult(@Nullable String[] data) {
+                resultsCached = data;
+                super.deliverResult(data);
             }
         };
     }
@@ -149,19 +164,44 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.forecast, menu);
+        getMenuInflater().inflate(R.menu.forecast_menu, menu);
         return true;
     }
 
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.refresh_action) {
-            mForecastAdapter.setForecast(null);
-            onRefresh();
+        if (item.getItemId() == R.id.settings_action) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
 }
