@@ -16,13 +16,15 @@
 
 
     <string name="pref_units_key">units</string>
-
+    <string name="pref_units_default">metric</string>
     <string name="pref_unit_celsius_label">Celsius</string>
     <string name="pref_unit_fahrenheit_label">Fahrenheit</string>
-
     <string name="pref_unit_celsius_value">metric</string>
     <string name="pref_unit_fahrenheit_value">imperial</string>
 
+
+    <string name="pref_location_key">location</string>
+    <string name="pref_location_default">04400</string>
 
     <!-- - - - - - - - - - - - - -->
     <!--Used by SunshineDateUtils-->

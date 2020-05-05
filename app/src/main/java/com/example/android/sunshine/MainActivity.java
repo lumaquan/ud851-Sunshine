@@ -1,6 +1,7 @@
 package com.example.android.sunshine;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.AsyncTaskLoader;
 import androidx.loader.content.Loader;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -32,10 +34,12 @@ import java.net.URL;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements ForecastAdapter.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener, LoaderManager.LoaderCallbacks<String[]> {
+public class MainActivity extends AppCompatActivity implements ForecastAdapter.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener,
+        LoaderManager.LoaderCallbacks<String[]>, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final int WEATHER_FORECAST_LOADER_ID = 783;
     private static final String WEATHER_FORECAST_EXTRA = "forecast_extra";
+    private static boolean sharedPreferencesUpdated = false;
 
     @BindView(R.id.rv_forecast)
     RecyclerView mForecastRecyclerView;
@@ -68,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
     }
 
     private void loadWeatherData() {
@@ -93,7 +98,6 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
 
     @Override
     public void onRefresh() {
-        swipeRefreshLayout.setRefreshing(true);
         loadWeatherData();
     }
 
@@ -182,6 +186,10 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
     @Override
     protected void onStart() {
         super.onStart();
+        if (sharedPreferencesUpdated) {
+            loadWeatherData();
+            sharedPreferencesUpdated = false;
+        }
     }
 
     @Override
@@ -202,6 +210,11 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        sharedPreferencesUpdated = true;
+    }
 }
