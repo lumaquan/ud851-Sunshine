@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
 
     private void loadWeatherData() {
         String preferredLocation = SunshinePreferences.getPreferredWeatherLocation(this);
-        URL urlPreferredLocation = NetworkUtils.buildUrlForZipCodeCodeCountry(preferredLocation);
+        URL urlPreferredLocation = NetworkUtils.buildUrlForCityCountry(preferredLocation);
         if (urlPreferredLocation != null) {
             Bundle forecastURL = new Bundle();
             forecastURL.putSerializable(WEATHER_FORECAST_EXTRA, urlPreferredLocation);
@@ -190,21 +190,6 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.O
             loadWeatherData();
             sharedPreferencesUpdated = false;
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 
     @Override

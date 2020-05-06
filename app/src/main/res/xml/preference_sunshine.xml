@@ -3,12 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ListPreference
-        android:dialogIcon="@drawable/ic_termometer"
         android:defaultValue="@string/pref_units_default"
+        android:dialogIcon="@drawable/ic_termometer"
         android:entryValues="@array/pref_units_values"
         android:icon="@drawable/ic_termometer"
         android:key="@string/pref_units_key"
         android:title="Temperature units"
         app:entries="@array/pref_units_labels" />
+
+    <EditTextPreference
+        android:defaultValue="@string/pref_location_default"
+        android:icon="@drawable/ic_location"
+        android:inputType="text"
+        android:key="@string/pref_location_key"
+        android:title="Location" />
 
 </PreferenceScreen>

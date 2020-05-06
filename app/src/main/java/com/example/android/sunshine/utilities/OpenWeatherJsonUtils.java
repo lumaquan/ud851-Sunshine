@@ -46,10 +46,9 @@ public final class OpenWeatherJsonUtils {
         long startDay = SunshineDateUtils.normalizeDate(utcDate);
 
         for (int i = 0; i < weatherArray.length(); i++) {
+
             String date;
             String highAndLow;
-
-            /* These are the values that will be collected */
             long dateTimeMillis;
             double high;
             double low;
@@ -74,7 +73,6 @@ public final class OpenWeatherJsonUtils {
     }
 
     public static ContentValues[] getFullWeatherDataFromJson(Context context, String forecastJsonStr) {
-        /** This will be implemented in a future lesson **/
         return null;
     }
 }
